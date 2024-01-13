@@ -1,5 +1,7 @@
 package com.example;
 
+import com.mongodb.ConnectionString;
+import com.mongodb.MongoClientSettings;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
@@ -19,16 +21,35 @@ public class App
 {
     public static void main( String[] args ){
 //        java.util.logging.Logger.getLogger("JULLogger").setLevel(Level.OFF);
+      String connectionString = "mongodb+srv://stefanholmberg:hejsan123@cluster0.omzqfhx.mongodb.net/?retryWrites=true&w=majority";
+        MongoClientSettings settings = MongoClientSettings.builder()
+                .applyConnectionString(new ConnectionString(connectionString))
+                .build();
+
+
+
         MongoDatabase db;
-        try (MongoClient mongoClient = MongoClients.create()){
+        try (MongoClient mongoClient = MongoClients.create(settings)){
         //try (MongoClient mongoClient = new MongoClient("localhost", 27017)) {
-            db = mongoClient.getDatabase("Whatever");
-            MongoCollection<Document> coll = db.getCollection("customers");
+            db = mongoClient.getDatabase("Whatever2");
+            MongoCollection<Document> coll = db.getCollection("person");
 
             Document doc = new Document()
-                    .append("_id", UUID.randomUUID())
-                    .append("namn", "Stefan").append("city", "Nacka");
+                    .append("_id", "20080528-0000")
+                    .append("namn", "Oliver")
+                    .append("city", "Nacka")
+                    .append("age", 15);
             coll.insertOne(doc);
+
+
+            doc = new Document()
+                    .append("_id", "19720803-0000")
+                    .append("namn", "Stefan")
+                    .append("city", "Nacka")
+                    .append("age", 51)
+                    .append("coolFactor", false);
+            coll.insertOne(doc);
+
 
             long l = coll.countDocuments();
             System.out.println(l);
@@ -39,7 +60,7 @@ public class App
             }
 
             //Update - lets take the first one
-            UUID key = (UUID) coll.find().first().get("_id");
+            String key = (String) coll.find().first().get("_id");
             coll.updateOne(new Document("_id", key),
                     new Document("$set", new Document("namn", "Test"))
                     );
